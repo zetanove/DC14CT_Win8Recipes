@@ -65,8 +65,21 @@ namespace Ricettario
         private async void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            var sampleDataGroup = await SampleDataSource.GetGroupAsync("Group-4");
-            this.DefaultViewModel["Section3Items"] = sampleDataGroup;
+            //var sampleDataGroup = await SampleDataSource.GetGroupAsync("Group-4");
+            //this.DefaultViewModel["Section3Items"] = sampleDataGroup;
+
+            
+            var gruppiRicette = await RecipeDataSource.GetGroupsAsync();
+            this.DefaultViewModel["Groups"] = gruppiRicette;
+            
+            foreach(RecipeDataGroup rgroup in gruppiRicette)
+            {
+                DefaultViewModel[rgroup.UniqueId] = rgroup;
+            }
+
+            RecipeDataGroup group = DefaultViewModel.OrderBy(rnd => Guid.NewGuid()).First().Value as RecipeDataGroup;
+            DefaultViewModel["TodayRecipe"]  = group.Items.OrderBy(r => Guid.NewGuid()).First() as RecipeDataItem;
+            DefaultViewModel["RandomSection"] = group;
         }
 
         /// <summary>
@@ -78,7 +91,7 @@ namespace Ricettario
         {
             HubSection section = e.Section;
             var group = section.DataContext;
-            this.Frame.Navigate(typeof(SectionPage), ((SampleDataGroup)group).UniqueId);
+            this.Frame.Navigate(typeof(SectionPage), ((RecipeDataGroup)group).UniqueId);
         }
 
         /// <summary>
@@ -91,8 +104,15 @@ namespace Ricettario
         {
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
-            var itemId = ((SampleDataItem)e.ClickedItem).UniqueId;
-            this.Frame.Navigate(typeof(ItemPage), itemId);
+            if (e.ClickedItem is RecipeDataGroup)
+            {
+                this.Frame.Navigate(typeof(SectionPage), ((RecipeDataGroup)e.ClickedItem).UniqueId);
+            }
+            else
+            {
+                var itemId = ((RecipeDataItem)e.ClickedItem).UniqueId;
+                this.Frame.Navigate(typeof(ItemPage), itemId);
+            }
         }
         #region NavigationHelper registration
 
@@ -108,6 +128,8 @@ namespace Ricettario
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             navigationHelper.OnNavigatedTo(e);
+
+            
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -116,5 +138,19 @@ namespace Ricettario
         }
 
         #endregion
+
+        private void pageRoot_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (this.ActualWidth < 500)
+            {
+                theHub.Sections[0].Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                theHub.Orientation = Orientation.Vertical;
+            }
+            else
+            {
+                theHub.Sections[0].Visibility = Windows.UI.Xaml.Visibility.Visible;
+                theHub.Orientation = Orientation.Horizontal;
+            }
+        }
     }
 }

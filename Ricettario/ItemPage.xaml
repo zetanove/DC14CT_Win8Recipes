@@ -11,6 +11,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <common:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <common:ListConverter x:Key="ListConverter" />
+    </Page.Resources>
+
     <!--
         This grid acts as a root panel for the page that defines two rows:
         * Row 0 contains the back button and page title
@@ -18,7 +23,7 @@
     -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
         DataContext="{Binding Item}"
-        d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}">
+        d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/RecipeData.json, Type=data:RecipeDataSource}}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -33,7 +38,53 @@
             TODO: Content should be placed within the following grid 
                   to show details for the current item
         -->
-        <Grid Grid.Row="1" x:Name="contentRegion"/>
+        <Grid Grid.Row="1" x:Name="contentRegion">
+            <ScrollViewer x:Name="landscapeContent" Grid.Row="1">
+                <Grid Margin="120,0,20,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400" />
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="360" />
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Vertical" Grid.Column="0">
+                        <Image Width="400" Margin="0,20,0,10" Stretch="Uniform" Source="{Binding ImagePath}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="26.667" FontWeight="Light" Text="Preparation time:"/>
+                            <TextBlock FontSize="26.667" FontWeight="Light" Text="{Binding PrepTime}" Margin="10,0,8,0"/>
+                            <TextBlock FontSize="26.667" FontWeight="Light" Text="minutes"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Grid.Column="2">
+                        <TextBlock FontSize="26.667" FontWeight="Light" Text="Ingredients" Margin="0,0,0,16"/>
+                        <TextBlock FontSize="20" FontWeight="Light" LineHeight="28" Text="{Binding Ingredients, Converter={StaticResource ListConverter}}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Grid.Column="4">
+                        <TextBlock FontSize="26.667" FontWeight="Light" Text="Directions" Margin="0,0,0,16"/>
+                        <TextBlock FontSize="20" FontWeight="Light" Text="{Binding Directions}" Margin="0,0,40,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="portraitContent" Grid.Row="1" Visibility="Collapsed">
+                <StackPanel Orientation="Vertical" Margin="120,0,20,20">
+                    <Image Width="400" Margin="0,20,0,10" Stretch="Uniform" Source="{Binding ImagePath}" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontSize="26.667" FontWeight="Light" Text="Preparation time:"/>
+                        <TextBlock FontSize="26.667" FontWeight="Light" Text="{Binding PrepTime}" Margin="10,0,8,0"/>
+                        <TextBlock FontSize="26.667" FontWeight="Light" Text="minutes"/>
+                    </StackPanel>
+                    <TextBlock FontSize="26.667" FontWeight="Light" Text="Ingredients" Margin="0,24,0,8"/>
+                    <TextBlock FontSize="20" FontWeight="Light" LineHeight="28" Text="{Binding Ingredients, Converter={StaticResource ListConverter}}" TextWrapping="Wrap" />
+                    <TextBlock FontSize="26.667" FontWeight="Light" Text="Directions" Margin="0,24,0,8"/>
+                    <TextBlock FontSize="20" FontWeight="Light" Text="{Binding Directions}" Margin="0,0,40,0" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
 
         <!-- Back button and page title -->
         <Grid>
