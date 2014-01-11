@@ -49,7 +49,33 @@ namespace Ricettario
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += navigationHelper_LoadState;
+
+            search.SuggestionsRequested += search_SuggestionsRequested;
+            search.QuerySubmitted += search_QuerySubmitted;
         }
+
+        void search_QuerySubmitted(SearchBox sender, SearchBoxQuerySubmittedEventArgs args)
+        {
+            Flyout fly = new Flyout();
+            TextBlock tb=new TextBlock(){ Text="Hai cercato "+args.QueryText};
+            fly.Content = tb;
+            fly.ShowAt(search);
+        }
+
+        async void search_SuggestionsRequested(SearchBox sender, SearchBoxSuggestionsRequestedEventArgs args)
+        {
+            var groups=await RecipeDataSource.GetGroupsAsync();
+            List<string> terms=new List<string>();
+            
+            foreach(var group in groups )
+            {
+                terms.AddRange(group.Items.Select(r => r.Title));
+            }
+            var query = terms.Where(x => x.StartsWith(args.QueryText, StringComparison.OrdinalIgnoreCase));
+            args.Request.SearchSuggestionCollection.AppendQuerySuggestions(query);
+        }
+
+
 
         /// <summary>
         /// Populates the page with content passed during navigation.  Any saved state is also
@@ -77,7 +103,7 @@ namespace Ricettario
                 DefaultViewModel[rgroup.UniqueId] = rgroup;
             }
 
-            RecipeDataGroup group = DefaultViewModel.OrderBy(rnd => Guid.NewGuid()).First().Value as RecipeDataGroup;
+            RecipeDataGroup group = gruppiRicette.OrderBy(rnd => Guid.NewGuid()).First() as RecipeDataGroup;
             DefaultViewModel["TodayRecipe"]  = group.Items.OrderBy(r => Guid.NewGuid()).First() as RecipeDataItem;
             DefaultViewModel["RandomSection"] = group;
         }
@@ -151,6 +177,12 @@ namespace Ricettario
                 theHub.Sections[0].Visibility = Windows.UI.Xaml.Visibility.Visible;
                 theHub.Orientation = Orientation.Horizontal;
             }
+        }
+
+        private void Grid_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var itemId = ((RecipeDataItem)DefaultViewModel["TodayRecipe"]).UniqueId;
+            this.Frame.Navigate(typeof(ItemPage), itemId);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Ricettario.Common;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.ApplicationSettings;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -92,6 +93,22 @@ namespace Ricettario
             }
             // Ensure the current window is active
             Window.Current.Activate();
+
+            SettingsPane.GetForCurrentView().CommandsRequested += App_CommandsRequested;
+        }
+
+        void App_CommandsRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs args)
+        {
+            args.Request.ApplicationCommands.Add(new SettingsCommand("about", "Informazioni", 
+                new Windows.UI.Popups.UICommandInvokedHandler((cmd)=>{
+                    new AboutSettingsFlyout().Show();
+                }))
+            );
+
+            var loader = new Windows.ApplicationModel.Resources.ResourceLoader();
+            var str = loader.GetString("Preferences");
+            var prefCommand = new SettingsCommand("pref", str, async (handler) => { await new MessageDialog("non implementato").ShowAsync(); });
+            args.Request.ApplicationCommands.Add(prefCommand);
         }
 
         /// <summary>

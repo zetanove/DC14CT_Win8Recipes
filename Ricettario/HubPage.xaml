@@ -46,6 +46,7 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="500"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button  x:Name="backButton" Style="{StaticResource NavigationBackButtonNormalStyle}"
@@ -57,7 +58,8 @@
 						AutomationProperties.ItemType="Navigation Button"/>
                     <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
 						VerticalAlignment="Top" IsHitTestVisible="false" TextWrapping="NoWrap" />
-                    
+
+                    <SearchBox x:Name="search" PlaceholderText="ricerca" Width="300" Height="32" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,40" Grid.Column="2" />
                 </Grid>
             </Hub.Header>
             <HubSection Width="980" Margin="0,0,80,0">
@@ -75,7 +77,7 @@
                 d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/RecipeData.json, Type=data:RecipeDataSource}}"
                 Width="500" x:Uid="Section1Header">
                 <DataTemplate>
-                    <Grid>
+                    <Grid Tapped="Grid_Tapped" IsHitTestVisible="True">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
