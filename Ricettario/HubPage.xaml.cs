@@ -60,6 +60,7 @@ namespace Ricettario
             TextBlock tb=new TextBlock(){ Text="Hai cercato "+args.QueryText};
             fly.Content = tb;
             fly.ShowAt(search);
+            this.Frame.Navigate(typeof(SearchResultsPage), args.QueryText);
         }
 
         async void search_SuggestionsRequested(SearchBox sender, SearchBoxSuggestionsRequestedEventArgs args)

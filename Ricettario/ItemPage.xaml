@@ -15,6 +15,19 @@
         <common:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <common:ListConverter x:Key="ListConverter" />
     </Page.Resources>
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton x:Name="shareButton" Label="Share" Icon="Mail">
+                 <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="Share recipe" Tapped="MenuFlyoutItem_Tapped"  />
+                            <MenuFlyoutItem Text="Photo" />
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            <AppBarToggleButton x:Name="pinButton" Label="Pin" Icon="Favorite" IsChecked="False" Tapped="AppBarToggleButton_Tapped"/>
+        </CommandBar>
+    </Page.BottomAppBar>
 
     <!--
         This grid acts as a root panel for the page that defines two rows:

@@ -8,6 +8,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.ApplicationSettings;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
@@ -35,7 +36,27 @@ namespace Ricettario
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            DetermineAppTheme();
         }
+
+        private void DetermineAppTheme()
+        {
+            bool value = false;
+
+            if (ApplicationData.Current.LocalSettings.Values.ContainsKey("IsLightTheme"))
+            {
+                value = (bool)ApplicationData.Current.LocalSettings.Values["IsLightTheme"];
+
+            }
+            if (value == true)
+            {
+                this.RequestedTheme = ApplicationTheme.Light;
+            }
+            else
+            {
+                this.RequestedTheme = ApplicationTheme.Dark;
+            }
+        } 
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -107,7 +128,7 @@ namespace Ricettario
 
             var loader = new Windows.ApplicationModel.Resources.ResourceLoader();
             var str = loader.GetString("Preferences");
-            var prefCommand = new SettingsCommand("pref", str, async (handler) => { await new MessageDialog("non implementato").ShowAsync(); });
+            var prefCommand = new SettingsCommand("pref", str, async (handler) => { new PreferencesSettingsFlyout().Show(); });
             args.Request.ApplicationCommands.Add(prefCommand);
         }
 

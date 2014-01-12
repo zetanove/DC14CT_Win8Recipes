@@ -148,14 +148,12 @@ namespace Ricettario.Data
             else
             {
                 string url = "https://dl.dropboxusercontent.com/u/13644127/RecipeData.json";
-                _baseUri = "http://contosorecipes8.blob.core.windows.net/";
                 var cts = new CancellationTokenSource();
                 cts.CancelAfter(5000); // Wait up to 5 seconds
 
                 try
                 {
                     var client = new HttpClient();
-                    //var response = await client.GetAsync(new Uri(_baseUri + "BlueRecipes")).AsTask(cts.Token);
                     var response = await client.GetAsync(new Uri(url)).AsTask(cts.Token);
 
                     if (!response.IsSuccessStatusCode)

@@ -6,14 +6,19 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Graphics.Imaging;
+using Windows.Storage.Streams;
+using Windows.UI.StartScreen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 
@@ -51,6 +56,34 @@ namespace Ricettario
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += navigationHelper_LoadState;
+
+            DataTransferManager.GetForCurrentView().DataRequested += ItemPage_DataRequested;
+        }
+
+        async void ItemPage_DataRequested(DataTransferManager sender, DataRequestedEventArgs args)
+        {
+            var request = args.Request;
+            //var item = (RecipeDataItem)this.flipView.SelectedItem;
+            var item = (RecipeDataItem)contentRegion.DataContext;
+            request.Data.Properties.Title = item.Title;
+
+            request.Data.Properties.Description = "Recipe ingredients and directions";
+
+            if (!sharePhoto)
+            {
+                // Share recipe text
+                var recipe = "\r\nINGREDIENTS\r\n";
+                recipe += String.Join("\r\n", item.Ingredients);
+                recipe += ("\r\n\r\nDIRECTIONS\r\n" + item.Directions);
+                request.Data.SetText(recipe);
+            }
+            if(sharePhoto)
+            {
+                // Share recipe image
+                var reference = RandomAccessStreamReference.CreateFromUri(new Uri(item.ImagePath));
+                request.Data.Properties.Thumbnail = reference;
+                request.Data.SetBitmap(reference);
+            }
         }
 
         /// <summary>
@@ -69,6 +102,8 @@ namespace Ricettario
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var item = await RecipeDataSource.GetItemAsync((String)e.NavigationParameter);
             this.DefaultViewModel["Item"] = item;
+
+            pinButton.IsChecked = SecondaryTile.Exists(item.UniqueId);
         }
 
         #region NavigationHelper registration
@@ -94,5 +129,42 @@ namespace Ricettario
         }
 
         #endregion
+
+        private async void AppBarToggleButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var item = (RecipeDataItem)contentRegion.DataContext;
+            if (SecondaryTile.Exists(item.UniqueId))
+            {
+                var tile = new SecondaryTile(item.UniqueId);
+                await tile.RequestDeleteAsync();
+            }
+            else
+            {
+                
+                var uri = new Uri(item.TileImagePath);
+
+                var tile = new SecondaryTile(
+                    item.UniqueId,
+                    item.Title,
+                    item.UniqueId,
+                    uri,
+                    TileSize.Square150x150
+                    );
+
+                tile.VisualElements.ShowNameOnSquare150x150Logo = true;
+                await tile.RequestCreateAsync();
+            }
+        }
+
+        private void shareButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            DataTransferManager.ShowShareUI();
+        }
+
+        bool sharePhoto = false;
+        private void MenuFlyoutItem_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            DataTransferManager.ShowShareUI();
+        }
     }
 }
